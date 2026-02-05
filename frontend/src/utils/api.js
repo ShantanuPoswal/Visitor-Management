@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // API request helper with token validation
 const makeAuthRequest = async (requestFn) => {
@@ -46,7 +46,7 @@ const api = axios.create({
 api.interceptors.request.use(
     async config => {
         const token = localStorage.getItem('token');
-        
+
         // Skip token check for auth endpoints
         if (config.url.includes('/auth/')) {
             return config;
@@ -89,7 +89,7 @@ api.interceptors.response.use(
                 : error.response.data.message;
             return Promise.reject(new Error(errorMessage));
         }
-        
+
         // Handle authentication errors
         if (error.response?.status === 401) {
             console.error('Authentication error:', error);
@@ -181,7 +181,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             // Remove invalid token
             localStorage.removeItem('token');
-            
+
             // Only redirect if not a login attempt or user verification
             if (!originalRequest.url.includes('/auth/login') &&
                 !originalRequest.url.includes('/auth/me')) {
@@ -202,7 +202,7 @@ export const auth = {
             },
             withCredentials: true
         }),
-    
+
     register: (userData) =>
         api.post('/auth/register', userData)
             .then(response => response)
@@ -212,7 +212,7 @@ export const auth = {
                 }
                 throw error;
             }),
-    
+
     getCurrentUser: () =>
         api.get('/auth/me', {
             headers: {
@@ -221,12 +221,12 @@ export const auth = {
             },
             withCredentials: true
         }),
-    
-    updateProfile: (userData) => 
+
+    updateProfile: (userData) =>
         api.put('/auth/profile', userData),
-    
+
     // Get list of active hosts
-    getHosts: () => 
+    getHosts: () =>
         api.get('/auth/hosts')
 };
 
@@ -253,11 +253,11 @@ export const visitors = {
     getVisitsByDateRange: (startDate, endDate) => makeAuthRequest(() =>
         api.get(`/visitors/date-range?startDate=${startDate}&endDate=${endDate}`)
     ),
-    
+
     approveVisit: (visitId, status) => makeAuthRequest(() =>
         api.put(`/visitors/approve-visit/${visitId}`, { status })
     ),
-    
+
     checkoutVisitor: (visitId) => makeAuthRequest(() =>
         api.put(`/visitors/checkout/${visitId}`, {})
     ),

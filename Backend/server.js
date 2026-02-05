@@ -11,7 +11,7 @@ const app = express();
 
 // CORS Configuration
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Authorization'],
@@ -25,7 +25,8 @@ app.use(cors(corsOptions));
 
 // Set additional security headers
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    const origin = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });
@@ -63,11 +64,11 @@ app.use('/api/auth', (req, res, next) => {
 app.use('/api/visitors', (req, res, next) => {
     console.log('Visitor route accessed:', req.method, req.path);
     const authHeader = req.headers.authorization;
-    
+
     // Debug logging
     console.log('Auth header:', authHeader);
     console.log('Request headers:', req.headers);
-    
+
     next();
 }, visitorRoutes);
 

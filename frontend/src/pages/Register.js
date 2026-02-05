@@ -28,12 +28,12 @@ const Register = () => {
     const validateForm = () => {
         // Email validation regex
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
+
         if (!formData.role) {
             setError("Please select your role");
             return false;
         }
-        
+
         if (formData.role === 'host' && !formData.department) {
             setError("Department is required for hosts");
             return false;
@@ -71,7 +71,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-        
+
         if (!validateForm()) {
             return;
         }
@@ -82,14 +82,15 @@ const Register = () => {
             // Register and automatically log in
             await authRegister(formData);
             console.log("Registration and authentication successful");
-            
+
             // Navigate based on role
             const destination = formData.role === 'host' ? '/host-dashboard' : '/';
             console.log(`Navigating to ${destination}`);
             navigate(destination);
         } catch (err) {
             console.error("Registration error:", err);
-            setError('User already exists!');
+            const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -99,7 +100,7 @@ const Register = () => {
         <div className="auth-container">
             <div className="auth-card">
                 <h2>Register</h2>
-                
+
                 {error && (
                     <div className="alert alert-error">
                         <p>{error}</p>
@@ -205,8 +206,8 @@ const Register = () => {
                         </div>
                     )}
 
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className={`btn btn-primary ${loading ? 'loading' : ''}`}
                         disabled={loading || !formData.role}
                     >

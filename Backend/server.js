@@ -24,9 +24,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Set additional security headers
+// Set additional security headers
 app.use((req, res, next) => {
-    const origin = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.header('Access-Control-Allow-Origin', origin);
+    // Remove manual Access-Control-Allow-Origin to let cors middleware handle it
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });

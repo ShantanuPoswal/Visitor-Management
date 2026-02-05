@@ -8,7 +8,11 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
     try {
         console.log('Registration request:', req.body);
-        const { name, email, password, role, department, contactNumber } = req.body;
+        let { name, email, password, role, department, contactNumber } = req.body;
+        // Handle potential double-wrapping of data
+        if (!email && req.body.data) {
+            ({ name, email, password, role, department, contactNumber } = req.body.data);
+        }
 
         // Check if role is valid
         if (!['host', 'visitor'].includes(role)) {
@@ -73,14 +77,14 @@ router.post('/register', async (req, res) => {
 
     } catch (error) {
         console.error('Registration error:', error);
-        
+
         // Handle duplicate email error
         if (error.code === 11000 && error.keyPattern?.email) {
             return res.status(400).json({
                 message: 'Email address is already registered'
             });
         }
-        
+
         // Handle validation errors
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(err => err.message);
@@ -100,7 +104,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         console.log('Login attempt for:', req.body.email);
-        const { email, password } = req.body;
+        let { email, password } = req.body;
+        if (!email && req.body.data) {
+            ({ email, password } = req.body.data);
+        }
 
         // Find user
         const user = await User.findOne({ email });
@@ -117,7 +124,7 @@ router.post('/login', async (req, res) => {
         console.log('Attempting password verification for:', email);
         const isValid = await user.comparePassword(password);
         console.log('Password verification result:', isValid);
-        
+
         if (!isValid) {
             console.log('Password verification failed for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
